@@ -35,11 +35,13 @@ class HomeController extends GetxController {
         validationMessage = "Please select a type.";
       } else if (labelTextFieldController.text.isEmpty) {
         validationMessage = "Label cannot be empty.";
-      } else if (selectedDropdownValue.value != 'Text' &&
-          selectedDropdownValue.value != 'Button' &&
-          valueTextFieldController.text.isEmpty) {
-        validationMessage = "Value cannot be empty ";
-      } else if (selectedDropdownValue.value == 'TextView' &&
+      }
+      // else if (selectedDropdownValue.value != 'Text' &&
+      //     selectedDropdownValue.value != 'Button' &&
+      //     valueTextFieldController.text.isEmpty) {
+      //   validationMessage = "Value cannot be empty ";
+      //}
+      else if (selectedDropdownValue.value == 'TextView' &&
           placeholderTextFieldController.text.isEmpty) {
         validationMessage = "Placeholder cannot be empty ";
       }else if ((selectedDropdownValue.value == 'TextView'||
@@ -59,7 +61,7 @@ class HomeController extends GetxController {
           itemsTextFieldController.text.isEmpty) {
         validationMessage = "Items msg cannot be empty";
       }
-      else if (selectedDropdownValue.value == 'Radio Button' &&
+      else if (selectedDropdownValue.value == 'Dropdown' &&
           selectedItemTextFieldController.text.isEmpty) {
         validationMessage = "Selected dropdown value cannot be empty";
       }
@@ -93,8 +95,7 @@ class HomeController extends GetxController {
         if(selectedDropdownValue.value == 'Dropdown'||
             selectedDropdownValue.value == 'Radio Button')
           'Items': itemsTextFieldController.text,
-        if(selectedDropdownValue.value == 'Dropdown'||
-            selectedDropdownValue.value == 'Radio Button')
+        if(selectedDropdownValue.value == 'Dropdown')
           'SelectedItem': selectedItemTextFieldController.text,
         if (selectedDropdownValue.value == 'Button') ...{
           'Url': urlTextFieldController.text,

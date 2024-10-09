@@ -152,6 +152,7 @@ class HomeScreen extends StatelessWidget {
                                           controller: _controller.isRequiredTextFieldController,
                                           decoration: InputDecoration(
                                             labelText: _controller.selectedDropdownValue.value == 'Button'? 'Is Enable':'Is Required',
+                                            hintText: 'Please Enter like (e.g. Yes/No)',
                                             contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(10),
@@ -196,6 +197,7 @@ class HomeScreen extends StatelessWidget {
                                           controller: _controller.urlTextFieldController,
                                           decoration: InputDecoration(
                                             labelText: 'Enter Url',
+                                            hintText: 'Please enter your url',
                                             contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(10),
@@ -206,7 +208,9 @@ class HomeScreen extends StatelessWidget {
                                         TextField(
                                           controller: _controller.methodTextFieldController,
                                           decoration: InputDecoration(
+
                                             labelText: 'Enter Method',
+                                            hintText: 'Please enter request method',
                                             contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(10),
@@ -229,7 +233,8 @@ class HomeScreen extends StatelessWidget {
                                         TextField(
                                           controller: _controller.itemsTextFieldController,
                                           decoration: InputDecoration(
-                                            labelText: 'Enter write items with comma separator',
+                                            labelText: 'Enter items with comma separator',
+                                            hintText: 'Please write with comma separator (e.g. C,C++,Java)',
                                             contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(10),
@@ -243,13 +248,14 @@ class HomeScreen extends StatelessWidget {
                                   return Container();
                                 }),
                                 Obx(() {
-                                  if (_controller.selectedDropdownValue.value == 'Radio Button') {
+                                  if (_controller.selectedDropdownValue.value == 'Dropdown') {
                                     return Column(
                                       children: [
                                         TextField(
                                           controller: _controller.selectedItemTextFieldController,
                                           decoration: InputDecoration(
                                             labelText: 'Enter Selected Item',
+                                            hintText: 'Please enter item from your list',
                                             contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(10),
@@ -274,7 +280,7 @@ class HomeScreen extends StatelessWidget {
                                     backgroundColor: Colors.green,
                                     foregroundColor: Colors.black87,
                                   ),
-                                  child: const Text('Add Data', style: TextStyle(fontSize: 18)),
+                                  child: const Text('Add Data', style: TextStyle(fontSize: 18,)),
                                 ),
                               ],
                             ),
