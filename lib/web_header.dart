@@ -15,7 +15,7 @@ class WebHeader extends StatelessWidget implements PreferredSizeWidget {
           Row(
             children: [
               Image.asset(
-                'images/era_info_logo.jpeg', // Replace with your logo asset path
+                'assets/images/era_info_logo.jpeg', // Replace with your logo asset path
                 height: 40,
               ),
               const SizedBox(width: 10),

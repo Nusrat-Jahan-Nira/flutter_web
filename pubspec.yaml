@@ -61,7 +61,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-      - assets/images/
+      - assets/images/era_info_logo.jpeg
+      - assets/images/screen.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

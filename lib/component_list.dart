@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/page_info.dart';
 import 'package:get/get.dart';
 import 'component_controller.dart';
 
@@ -7,96 +8,98 @@ import 'component_controller.dart';
 
 class MyComponentList extends StatelessWidget {
 
-  const MyComponentList({super.key});
+  final pageInfo;
+  const MyComponentList({super.key, required this.pageInfo});
 
   @override
   Widget build(BuildContext context) {
-    final ComponentController componentController = Get.put(ComponentController());
+    final ComponentController componentController = Get.put(ComponentController(pageInfo));
 
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(10.0), // Reduced padding
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Obx(() {
-            return componentController.components.isEmpty
-                ? SizedBox(
-              height: 100,
-              child: Card(
-                elevation: 8,
-                margin: const EdgeInsets.symmetric(vertical: 5), // Reduced margin
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.teal.shade200, width: 1.5),
-                ),
-                child: const Center(child: Text('No Data Found')),
-              ),
-            )
-                : Card(
+        child: Obx(() {
+          return componentController.components.isEmpty
+              ? SizedBox(
+            height: 100,
+            child: Card(
               elevation: 8,
-              margin: const EdgeInsets.all(5.0),
+              margin: const EdgeInsets.symmetric(vertical: 5), // Reduced margin
               color: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(color: Colors.teal.shade200, width: 1.5),
               ),
-                  child: Column(
-                                children: componentController.components.asMap().map((index, component) {
-                  final componentData = Map<String, dynamic>.from(component['value']);
-                  return MapEntry(
-                    index,
-                    Dismissible(
-                      key: Key(componentData.toString()), // Use a unique key for each item
-                      direction: DismissDirection.endToStart, // Swipe from right to left
-                      background: Container(
-                        color: Colors.red, // Background color when swiped
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
+              child: const Center(child: Text('No Data Found')),
+            ),
+          )
+              : Stack(
+            alignment: Alignment.center,
+            children: [
+              // Mobile frame image
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/screen.jpg'), // Path to your mobile frame image
+                    fit: BoxFit.fill, // Cover the entire container
+                  ),
+                ),
+                width: double.infinity, // Width of the mobile frame
+                height: 600, // Height of the mobile frame
+              ),
+              // Component list
+              Container(
+                width: 350, // Match the mobile frame width
+                height: 600, // Match the mobile frame height
+                padding: const EdgeInsets.only(left: 10.0,right: 10.0,top: 100.0,bottom: 100.0),  // Padding for content inside the mobile
+                child: ListView(
+                  children: componentController.components.asMap().map((index, component) {
+                    final componentData = Map<String, dynamic>.from(component['value']);
+                    return MapEntry(
+                      index,
+                      Dismissible(
+                        key: Key(componentData.toString()), // Use a unique key for each item
+                        direction: DismissDirection.endToStart, // Swipe from right to left
+                        background: Container(
+                          color: Colors.red, // Background color when swiped
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
+                        ),
+                        onDismissed: (direction) {
+                          // Call deleteComponent from the controller
+                          componentController.deleteComponent(component['key'].toString(), pageInfo);
+
+                          // Remove the item from the local list
+                          componentController.components.removeAt(index);
+
+                          // Show a snackbar to confirm deletion
+                          Get.snackbar(
+                            'Deleted',
+                            '${componentData['Label']} has been deleted',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0), // Padding for content
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch, // Full width for elements
+                            children: [
+                              _buildComponentWidget(componentData),
+                            ],
+                          ),
                         ),
                       ),
-                      onDismissed: (direction) {
-                        // Call deleteComponent from the controller
-                        componentController.deleteComponent(component['key'].toString());
-
-                        // Remove the item from the local list
-                        componentController.components.removeAt(index);
-
-                        // Show a snackbar to confirm deletion
-                        Get.snackbar(
-                          'Deleted',
-                          '${componentData['Label']} has been deleted',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0), // Padding for content
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch, // Full width for elements
-                          children: [
-                            // Text(
-                            //   '${componentData['Type'] ?? 'No Type'}',
-                            //   style: TextStyle(
-                            //     fontSize: 12,
-                            //     fontWeight: FontWeight.bold,
-                            //     color: Colors.teal[800],
-                            //   ),
-                            // ),
-                            // const SizedBox(height: 5), // Spacing between title and component
-                            _buildComponentWidget(componentData),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                                }).values.toList(),
-                              ),
-                );
-          }),
-        ),
+                    );
+                  }).values.toList(),
+                ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -116,15 +119,17 @@ class MyComponentList extends StatelessWidget {
 
     switch (componentData['Type']) {
       case 'Text':
-        return Text(
-          componentData['Label'],
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Colors.teal,
+        return Center(
+          child: Text(
+            componentData['Label'],
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.teal,
+            ),
           ),
         );
-      case 'TextView':
+      case 'EditText':
       // Extracting the data from componentData
         String label = componentData['Label'] ?? 'Label';
         String placeholder = componentData['Placeholder'] ?? 'Enter text here';
@@ -236,12 +241,18 @@ class MyComponentList extends StatelessWidget {
 
       case 'Dropdown':
       // Extracting the data from componentData
-        String label = componentData['Label'] ?? 'Select Item'; // Label for the dropdown
-        // Check if 'items' is null, and set a default value or an empty list
+        String label = componentData['Label'] ?? 'Select Item'; // Default label if null
         dynamic itemsData = componentData['Items'];
+
+// Preparing the items list
         List<String> items = (itemsData is String)
             ? itemsData.split(',').map((item) => item.trim()).toList() // Split string by commas
             : (itemsData is List<String>) ? List<String>.from(itemsData) : []; // Ensure it's a list, or set as empty
+
+// Add label to items if not already included
+        if (!items.contains(label)) {
+          items.insert(0, label); // Insert the label at the beginning of the list
+        }
 
         String requiredString = componentData['Required'] ?? 'No';
         bool isRequired = (requiredString == 'Yes') ? true : false;  // Convert "Yes" or "No" to bool
@@ -326,192 +337,5 @@ class MyComponentList extends StatelessWidget {
     }
   }
 }
-
-
-// class MyComponentList extends StatelessWidget {
-//   const MyComponentList({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final ComponentController componentController = Get.put(ComponentController());
-//
-//     return SingleChildScrollView(
-//       child: Padding(
-//         padding: const EdgeInsets.all(10.0), // Reduced padding
-//         child: Container(
-//           constraints: const BoxConstraints(maxWidth: 800),
-//           child: Obx(() {
-//             return componentController.components.isEmpty
-//                 ? SizedBox(
-//               height: 100,
-//               child: Card(
-//                 elevation: 8,
-//                 margin: const EdgeInsets.symmetric(vertical: 5), // Reduced margin
-//                 color: Colors.white,
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                   side: BorderSide(color: Colors.teal.shade200, width: 1.5),
-//                 ),
-//                 child: const Center(child: Text('No Data Found')),
-//               ),
-//             )
-//                 : Column(
-//               children: componentController.components.asMap().map((index, component) {
-//                 final componentData = Map<String, dynamic>.from(component['value']);
-//
-//                 return MapEntry(
-//                   index,
-//                   Padding(
-//                     padding: const EdgeInsets.symmetric(vertical: 2.0), // Reduced padding
-//                     child: Card(
-//                       elevation: 8,
-//                       // margin: const EdgeInsets.symmetric(vertical: 2),
-//                       color: Colors.white,
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                         side: BorderSide(color: Colors.teal.shade200, width: 1.5),
-//                       ),
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(16.0), // Padding for content
-//                         child: Column(
-//                           crossAxisAlignment: CrossAxisAlignment.stretch, // Full width for elements
-//                           children: [
-//                             Text(
-//                               '${componentData['Type'] ?? 'No Type'}',
-//                               style: TextStyle(
-//                                 fontSize: 16,
-//                                 fontWeight: FontWeight.bold,
-//                                 color: Colors.teal[800],
-//                               ),
-//                             ),
-//                             const SizedBox(height: 5), // Spacing between title and component
-//                             _buildComponentWidget(componentData),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               }).values.toList(),
-//             );
-//           }),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   // A method to build the appropriate widget based on the type
-//   Widget _buildComponentWidget(Map<String, dynamic> componentData) {
-//     List<String> radioOptions = ['Option 1', 'Option 2', 'Option 3'];
-//     int selectedValue = 0;
-//
-//     // Define the decoration to be used by all widgets
-//     InputDecoration inputDecoration = InputDecoration(
-//       contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5), // Padding inside
-//       border: OutlineInputBorder(
-//         borderRadius: BorderRadius.circular(8),
-//         borderSide: BorderSide(color: Colors.teal.shade200), // Border color
-//       ),
-//       filled: true,
-//       fillColor: Colors.grey.shade100, // Background color
-//     );
-//
-//     switch (componentData['Type']) {
-//       case 'Text':
-//         return Container(
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(8),
-//             border: Border.all(color: Colors.teal.shade200),
-//           ),
-//           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-//           child: const Text(
-//             'Text Widget',
-//             style: TextStyle(
-//               fontSize: 15,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.teal,
-//             ),
-//           ),
-//         );
-//       case 'TextView':
-//         return TextFormField(
-//           readOnly: true,
-//           decoration: inputDecoration.copyWith(hintText: 'TextView Widget'),
-//         );
-//       case 'Button':
-//         return Container(
-//           margin: const EdgeInsets.symmetric(vertical: 8),
-//           child: ElevatedButton(
-//             onPressed: () {},
-//             style: ElevatedButton.styleFrom(
-//               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//               ),
-//               backgroundColor: Colors.green,
-//               foregroundColor: Colors.white,
-//             ),
-//             child: const Text('Button Widget'),
-//           ),
-//         );
-//       case 'Radio Button':
-//         return Column(
-//           children: radioOptions.asMap().entries.map((entry) {
-//             int index = entry.key;
-//             String option = entry.value;
-//
-//             return Row(
-//               children: [
-//                 Radio<int>(
-//                   value: index,
-//                   groupValue: selectedValue,
-//                   onChanged: (value) {}, // Call the passed callback here
-//                 ),
-//                 Text(option),
-//               ],
-//             );
-//           }).toList(),
-//         );
-//       case 'Dropdown':
-//         return Container(
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(8),
-//             border: Border.all(color: Colors.teal.shade200),
-//           ),
-//           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//           child: DropdownButtonFormField(
-//             decoration: const InputDecoration(border: InputBorder.none),
-//             items: const [
-//               DropdownMenuItem(value: 1, child: Text('Item 1')),
-//               DropdownMenuItem(value: 2, child: Text('Item 2')),
-//             ],
-//             onChanged: (value) {},
-//             hint: const Text('Select an item'),
-//           ),
-//         );
-//       case 'Checkbox':
-//         return Row(
-//           children: [
-//             Checkbox(value: true, onChanged: (value) {}),
-//             const Text('Checkbox'),
-//           ],
-//         );
-//       default:
-//         return Container(
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(8),
-//             border: Border.all(color: Colors.teal.shade200),
-//           ),
-//           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-//           child: const Text(
-//             'Unknown Component Type',
-//             style: TextStyle(color: Colors.grey),
-//           ),
-//         );
-//     }
-//   }
-// }
-
-
 
 

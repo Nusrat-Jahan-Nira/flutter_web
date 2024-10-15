@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/page_info.dart';
 import 'package:get/get.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -6,15 +7,15 @@ class ComponentController extends GetxController {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   var components = <Map<dynamic, dynamic>>[].obs; // Observable list of components
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchData(); // Fetch data when the controller is initialized
+  var pageInfo = PageInfo();
+
+  ComponentController(this.pageInfo) {
+    fetchData(pageInfo);
   }
 
-  void fetchData() {
+  void fetchData(PageInfo info) {
     _database
-        .child("component")
+        .child(info.pageRoute.toString())
         .onValue
         .listen((DatabaseEvent event) {
       DataSnapshot snapshot = event.snapshot;
@@ -35,10 +36,10 @@ class ComponentController extends GetxController {
     });
   }
 
-  void deleteComponent(String key) {
-    _database.child("component").child(key).remove().then((_) {
+  void deleteComponent(String key,PageInfo info) {
+    _database.child(info.pageRoute.toString()).child(key).remove().then((_) {
       debugPrint("Component deleted successfully.");
-      fetchData(); // Refresh the data after deletion
+      fetchData(info); // Refresh the data after deletion
     }).catchError((error) {
       debugPrint("Error deleting component: $error");
     });
